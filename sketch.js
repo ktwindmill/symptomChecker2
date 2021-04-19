@@ -27,6 +27,8 @@ let story='';
 
 //images
 let backgroundImage;
+let tiles;
+let tempGraphics;
 
 function preload(){
 
@@ -34,12 +36,15 @@ function preload(){
     roboto = loadFont('media/font/Roboto-Bold.ttf');
     
     backgroundImage=loadImage('media/layout.jpg');
+    tiles=loadImage('media/tiles.jpg');
 }
 
 
 
 function setup() {
-  createCanvas(500, 900);
+  createCanvas(displayWidth, displayHeight);
+tempGraphics = createGraphics
+    
   
   // Create the LSTM Generator passing it the model directory
   charRNN = ml5.charRNN('./models/adages/', modelReady);
@@ -75,10 +80,13 @@ for(let i = 1; i<27; i++){
     
     buttonArray[i].mousePressed(changeBG);
     var x = r *sin(angle + (step*i))+(width/2);
-    var y = r*cos(angle+ (step*i))+(400);
-    buttonArray[i].style("font-family","Times");
-      buttonArray[i].style("background-color",'#ffffff');
-      buttonArray[i].style("color","#2ed93b");
+    var y = r*cos(angle+ (step*i))+(380);
+    buttonArray[i].style("font-family","Helvetica");
+       buttonArray[i].style("font-size","20px");
+      buttonArray[i].style("color","#ffffff");
+      buttonArray[i].style("background-color",'Transparent');
+    buttonArray[i].style("border", "none");
+    buttonArray[i].style("outline", "none");
       buttonArray[i].position(x,y);
       
   }
@@ -87,7 +95,9 @@ for(let i = 1; i<27; i++){
   submit.mousePressed(generate);
     submit.position(width/2-60,height-80);
    submit.style("font-family","Times");
-      submit.style("background-color",'#ffffff');
+    submit.style("background-color",'Transparent');
+    submit.style("border", "none");
+    submit.style("outline", "none");
     submit.style("color","#fcba03");
     
     
@@ -96,7 +106,9 @@ for(let i = 1; i<27; i++){
   reset.mousePressed(resetString);
   reset.position(width/2+25,height-80);
      reset.style("font-family","Times");
-      reset.style("background-color",'#ffffff');
+      reset.style("background-color",'Transparent');
+    reset.style("border", "none");
+    reset.style("outline", "none");
     reset.style("color","#Gfcba03");
         
 
@@ -107,8 +119,11 @@ for(let i = 1; i<27; i++){
 
 function draw() {
     
- background(0);
-  image(backgroundImage,0,0,width,height);
+ background(255);
+    imageMode(CORNER);
+    image(tiles, 0,0,width, height);
+imageMode(CENTER);
+  image(backgroundImage,width/2,height/2, 500,900);
     
     
     fill(255);
@@ -125,13 +140,14 @@ function draw() {
   text(string, width/2-60,220,130,300);
     
      fill(255);  
-textSize(20);
-    text(story, 30, 690, width-60, 100);
+    textSize(20);
+     textAlign(CENTER, CENTER);
+    text(story, width/2-230, height-200, 460, 100);
     
     textFont(roboto);
     textSize(12);
     textAlign(LEFT);
-    text("This text was generated using", 20, height-40);
+    text("This text was generated using", width/2-200, height-40);
     
 
 }
