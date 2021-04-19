@@ -152,7 +152,9 @@ imageMode(CENTER);
 
 }
 
-
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
 
 function changeBG() {
   let letter = this.value();
