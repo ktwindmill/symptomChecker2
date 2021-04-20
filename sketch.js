@@ -5,6 +5,8 @@ Week 8
 Stateful generation CharRNN
 */
 
+
+
 let buttonArray = [];
 let string = '';
 let reset;
@@ -30,6 +32,12 @@ let backgroundImage;
 let tiles;
 let tempGraphics;
 
+
+//pix2pix variables
+tempGraphicSize = 256;
+
+
+
 function preload(){
 
   westernFont = loadFont('media/font/Carnevalee Freakshow.ttf');
@@ -42,10 +50,14 @@ function preload(){
 
 
 function setup() {
-  createCanvas(displayWidth, displayHeight);
-tempGraphics = createGraphics
+createCanvas(displayWidth, displayHeight);
+tempGraphics = createGraphics(tempGraphicSize,tempGraphicSize);
     
-  
+
+    //load out pix2pix model
+    pix2pix = ml5.pix2pix("/models/bones.pict",pixModelLoaded);
+
+    
   // Create the LSTM Generator passing it the model directory
   charRNN = ml5.charRNN('./models/adages/', modelReady);
   
@@ -221,7 +233,8 @@ function generate() {
     
       // Generate text with the charRNN
       charRNN.generate(data, gotData);
-    
+    createTempCanvas();
+        
     }else {
       // Clear everything
       prediction_text = "";
@@ -233,10 +246,67 @@ function generate() {
 
 // Update the DOM elements with typed and generated text
 function gotData(err, result) {
- console.log('ahem');
+ console.log('no results here');
   prediction_text = result.sample;
     story = ` ${string} can be treated by ${prediction_text}`
-  isGenerating = false;
+  
 
+ //createTempCanvas()
+isGenerating = false;
+    
 }
 
+
+
+function createTempCanvas(){
+    
+        //generate the pix2pix image
+  with(tempGraphics){
+    background(255);
+      fill(0);  
+    textSize(20);
+     textAlign(CENTER, CENTER);
+    text(story, width/2-230, height-200, 460, 100);
+  }
+    runPix2Pix();
+}
+
+///pix2pix area
+
+function pixModelLoaded() {
+    console.log('model loaded');
+    isProcessing = false;
+}
+
+
+function runPix2Pix() {
+    // Update status message
+    isProcessing = true;
+    console.log("applying pix2pix");
+
+    // pix2pix requires a canvas DOM element, we can get p5.js canvas and pass this
+    // Select canvas DOM element, this is the p5.js canvas
+  //  const canvasElement = select("tempGraphics").elt;
+
+    // Apply pix2pix transformation
+    //pix2pix.transfer(canvasElement).then((result) => {
+    pix2pix.transfer(tempGraphics).then((result) => {
+        
+    isProcessing = false;
+        let rec_img = createImg(result.src, "a generated image using pix2pix").hide(); // hide the DOM element
+        
+        
+        image(rec_img, 0, 0); // draw the image on the canvas
+        rec_img.save('perscription','png');
+        
+        rec_img.remove(); // this removes the DOM element, as we don't need it anymore
+    });
+}
+
+
+
+//where i am at the moment is that I need to get make the pix to pix section work
+
+
+                                
+                                    
