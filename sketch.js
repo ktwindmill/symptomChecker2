@@ -51,7 +51,7 @@ function preload(){
     
     backgroundImage=loadImage('media/layout.jpg');
     tiles=loadImage('media/tiles.jpg');
-    caducues=loadImage('media/caducues.png');
+    caducues=loadImage('media/caducues.jpg');
 }
 
 
