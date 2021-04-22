@@ -87,7 +87,7 @@ tempGraphics = createGraphics(tempGraphicSize,tempGraphicSize);
 
     //load out pix2pix model
 //    pix2pix = ml5.pix2pix("/models/bones.pict",pixModelLoaded);
-pix2pix = ml5.pix2pix("/models/brain.pict",pixModelLoaded);
+pix2pix = ml5.pix2pix("./models/brain.pict",pixModelLoaded);
 
     
   // Create the LSTM Generator passing it the model directory
@@ -280,7 +280,7 @@ async function modelReady() {
 
 function resetModel() {
   charRNN.reset();
-  const seed = string;
+  const seed = myString;
   charRNN.feed(seed);
   generated_text = seed;
 }
