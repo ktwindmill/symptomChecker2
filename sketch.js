@@ -87,7 +87,7 @@ function setup() {
     
 
     //load our pix2pix model
-    pix2pix = ml5.pix2pix("/models/bones.pict",pixModelLoaded);
+    pix2pix = ml5.pix2pix("./models/bones.pict",pixModelLoaded);
     //pix2pix = ml5.pix2pix("./models/brain.pict",pixModelLoaded);
 
     
