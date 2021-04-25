@@ -1,8 +1,6 @@
 /*
-Data and machine learning for artistic practice
-Week 8
-
-Stateful generation CharRNN
+Spooky perscription generator
+Katie Tindle 2021
 */
 
 
@@ -21,7 +19,7 @@ var step;
 
 //strings/story
 let title = "Tell us where it hurts";
-let blurb = "This is a bit of a blurb which I've not written yet. Blah blah blah blah";
+let blurb = "Welcome. Tell us where it hurts and we'll take a look. \n\n Once you have submitted your answer, please wait a few moments and your advice will be displayed in the central box. \n\n Allow downloads to receive your remote psychic scan.";
 
 let link, link2, link3;
 
@@ -29,7 +27,7 @@ let link, link2, link3;
 let charRNN, 
     isGenerating = false,
     generated_text ='',
-prediction_text = '';
+    prediction_text = '';
 let story='';
 
 //images
@@ -40,15 +38,16 @@ let caducues;
 
 
 //pix2pix variables
-tempGraphicSize = 256;
+let tempGraphicSize = 256;
+let isProcessing;
 
 
 
 function preload(){
-
-  westernFont = loadFont('media/font/Carnevalee Freakshow.ttf');
+    //load font
     roboto = loadFont('media/font/Roboto-Bold.ttf');
     
+    //load images
     backgroundImage=loadImage('media/layout.jpg');
     tiles=loadImage('media/tiles.jpg');
     caducues=loadImage('media/caducues.jpg');
@@ -57,26 +56,28 @@ function preload(){
 
 
 function setup() {
-createCanvas(displayWidth, displayHeight);
-tempGraphics = createGraphics(tempGraphicSize,tempGraphicSize);
+    
+    //create canvas and offscreen canvas
+    createCanvas(displayWidth, displayHeight);
+    tempGraphics = createGraphics(tempGraphicSize,tempGraphicSize);
     
     //hyperlink
-    link = createA('http://p5js.org/', 'This is a link');
+    link = createA('https://ml5js.org/', 'This project uses ml5');
     link.position(width/4*3,height/2);
     link.style("font-family","Helvetica");
     link.style("font-size","20px");
     link.style("color","rgb(133, 4, 23)");
     
     
-    link2 = createA('http://p5js.org/', 'And this is a link');
+    link2 = createA('http://p5js.org/', 'and P5.js');
     link2.position(width/4*3,height/2+30);
     link2.style("font-family","Helvetica");
     link2.style("font-size","20px");
     link2.style("color","rgb(133, 4, 23)");
     
     
-    link3 = createA('http://p5js.org/', 'This too, is a link');
-    link3.position(width/4*3,height/2+60);
+    link3 = createA('https://katietindle.co.uk/', 'katietindle.co.uk');
+    link3.position(width/4*3,height/2+80);
     link3.style("font-family","Helvetica");
     link3.style("font-size","20px");
     link3.style("color","rgb(133, 4, 23)");
@@ -85,98 +86,91 @@ tempGraphics = createGraphics(tempGraphicSize,tempGraphicSize);
     
     
 
-    //load out pix2pix model
-//    pix2pix = ml5.pix2pix("/models/bones.pict",pixModelLoaded);
-pix2pix = ml5.pix2pix("./models/brain.pict",pixModelLoaded);
+    //load our pix2pix model
+    pix2pix = ml5.pix2pix("/models/bones.pict",pixModelLoaded);
+    //pix2pix = ml5.pix2pix("./models/brain.pict",pixModelLoaded);
 
     
-  // Create the LSTM Generator passing it the model directory
-  charRNN = ml5.charRNN('./models/adages/', modelReady);
+    // Create the LSTM Generator passing it the model directory
+    charRNN = ml5.charRNN('./models/adages/', modelReady);
   
   
-     
-    //alphabet
     background(0);
   
   
-  //variables for the button positions
-  r = 180;
-  angle = 0;
+    //variables for the button positions
+    r = 180;
+    angle = 0;
   
-  //pi * 2
-  step = 6.28318/26;
+    //pi * 2
+    step = 6.28318/26;
   
  
   
-  //create the alphabet
-for(let i = 1; i<27; i++){
-  let letter = char(64+i);
+    //create the alphabet
+    for(let i = 1; i<27; i++){
+        let letter = char(64+i);
   
-  buttonArray.push(createButton(letter, letter));
-  
-  
-}  
+        buttonArray.push(createButton(letter, letter));
+    }  
 
   
  
-  //give the alphabet a function and a position in a circle
-  for(let i = 0; i<buttonArray.length; i++){
+    //give the alphabet a function and a position in a circle
+    for(let i = 0; i<buttonArray.length; i++){
     
-    buttonArray[i].mousePressed(type);
-    var x = r *sin(angle + (step*i))+(width/2);
-    var y = r*cos(angle+ (step*i))+(380);
-    buttonArray[i].style("font-family","Helvetica");
-       buttonArray[i].style("font-size","20px");
-      buttonArray[i].style("color","#ffffff");
-      buttonArray[i].style("background-color",'Transparent');
-    buttonArray[i].style("border", "none");
-    buttonArray[i].style("outline", "none");
-      buttonArray[i].position(x,y);
+        buttonArray[i].mousePressed(type);
+        var x = r *sin(angle + (step*i))+(width/2);
+        var y = r*cos(angle+ (step*i))+(380);
+        buttonArray[i].style("font-family","Helvetica");
+        buttonArray[i].style("font-size","20px");
+        buttonArray[i].style("color","#ffffff");
+        buttonArray[i].style("background-color",'Transparent');
+        buttonArray[i].style("border", "none");
+        buttonArray[i].style("outline", "none");
+        buttonArray[i].position(x,y);
       
-  }
+    }
   
-    
-    
-
-    
-  space = createButton('SPACE',char(32));
+    //create space bar
+    space = createButton('SPACE',char(32));
     space.mousePressed(type);
     space.position( width/2-180,height-200);
-   space.style("font-family","Helvetica");
+    space.style("font-family","Helvetica");
     space.style("background-color",'Transparent');
     space.style("border", "none");
     space.style("outline", "none");
     space.style("color","#ffffff");
     
     
-    
-  submit = createButton('SUBMIT');
-  submit.mousePressed(generate);
+    //create submit button
+    submit = createButton('SUBMIT');
+    submit.mousePressed(generate);
     submit.position(width/2+25,height-200);
-   submit.style("font-family","Helvetica");
+    submit.style("font-family","Helvetica");
     submit.style("background-color",'Transparent');
     submit.style("border", "none");
     submit.style("outline", "none");
     submit.style("color","#ffffff");
     
     
-    
+    //create a reset button/clear the text output
     reset = createButton('RESET');
-  reset.mousePressed(resetString);
-  reset.position(width/2+130,height-200);
-     reset.style("font-family","Helvetica");
-      reset.style("background-color",'Transparent');
+    reset.mousePressed(resetString);
+    reset.position(width/2+130,height-200);
+    reset.style("font-family","Helvetica");
+    reset.style("background-color",'Transparent');
     reset.style("border", "none");
     reset.style("outline", "none");
     reset.style("color","#ffffff");
         
 
-    
+    //create a backspace
     back = createButton('BACKSPACE');
-  back.mousePressed(backspace);
-  back.position(width/2-100,height-200);
-     back.style("font-family","Helvetica");
-      back.style("background-color",'Transparent');
+    back.mousePressed(backspace);
+    back.position(width/2-100,height-200);
+    back.style("font-family","Helvetica");
+    back.style("background-color",'Transparent');
     back.style("border", "none");
     back.style("outline", "none");
     back.style("color","#ffffff");
@@ -187,109 +181,107 @@ for(let i = 1; i<27; i++){
 
 function draw() {
     
- background(255);
+    //draw static images
+    background(255);
     imageMode(CORNER);
     image(tiles, 0,0,width, height);
-imageMode(CENTER);
-  image(backgroundImage,width/2,height/2, 500,900);
+    imageMode(CENTER);
+    image(backgroundImage,width/2,height/2, 500,900);
     
     
     fill(255);
     image(caducues, width/6,height/4,600,600);
     noStroke();
-//    rectMode(CENTER);
+
+    //draw left text box
     rect(width/6-140, height/4+140, 300,400,20);
     fill(133, 4, 23);
     
     textFont(roboto);
-  textSize(17);
+    textSize(17);
     textAlign(LEFT);
-    text(blurb,width/6-130, height/4+140, 300,390);
+    text(blurb,width/6-130, height/4+110, 300,390);
     
     
-    
+    //title
     fill(255);
     textSize(36);
-  textAlign(CENTER, CENTER);
-  text(title, 40,0,width-80,150);
+    textAlign(CENTER, CENTER);
+    text(title, 40,0,width-80,150);
   
     
+    //central inputted text
+    fill(255, 232, 25);  
+    textSize(40);
+    textAlign(CENTER, CENTER);
+    text(myString, width/2-60,220,130,300);
     
-  fill(255, 232, 25);  
-  textSize(40);
-  textAlign(CENTER, CENTER);
-  text(myString, width/2-60,220,130,300);
-    
-      
+    //generated text
     textSize(17);
-     textAlign(CENTER, CENTER);
+    textAlign(CENTER, CENTER);
     text(story, width/2-230, height-180, 460, 100);
     
     
- fill(255);
+    fill(255);
     textSize(12);
     textAlign(LEFT);
-    text("This text was generated using", width/2-200, height-40);
+    text("This text was generated using Mother's Remedies: Over One Thousand Tried and Tested Remedies from Mothers of the United States and Canada, by Thomas Jefferson Ritter (1910)", width/2-200, height-40,420);
+    
     
 
 }
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+    resizeCanvas(windowWidth, windowHeight);
 }
 
 function type() {
-  let letter = this.value();
-  letter = letter.toLowerCase();
-  //console.log(letter);
-  myString = myString+letter;
-  //console.log(string)
+    //record the text submission
+    let letter = this.value();
+    letter = letter.toLowerCase();
+    myString = myString+letter;
 }
 
 function backspace(){
     let backString = myString.slice(0,-1);
     myString = backString;
-    
 }
 
 
 function resetString(){
-      background(0);
+    background(0);
     myString='';
     // Clear everything
-      prediction_text = "";
-      original_text = "";
+    prediction_text = "";
+    original_text = "";
     story ='';
-    //background(0);
     resetModel();
-    
 }
-
-
-
 
 
 function windowResized() {
-  resizeCanvas(windowWidth, canvasHeight);
+    resizeCanvas(windowWidth, canvasHeight);
 }
 
 async function modelReady() {
-  console.log('model ready')
-  resetModel();
+    console.log('model ready')
+    resetModel();
 }
 
 function resetModel() {
-  charRNN.reset();
-  const seed = myString;
-  charRNN.feed(seed);
-  generated_text = seed;
+    charRNN.reset();
+    const seed = myString;
+    charRNN.feed(seed);
+    generated_text = seed;
 }
 
 function generate() {
+     isProcessing = true;
+    
     if(!isGenerating) {
     isGenerating = true;
     
-        console.log('generating...');
+    console.log('generating...');
     
     // Grab the original text
     let original = myString;
@@ -299,63 +291,56 @@ function generate() {
     // Check if there's something
     if (original_text.length > 0) {
         
-        let newString = ` ${original_text} can be treated by `;
-      // Here is the data for the LSTM generator
-      let data = {
-       // seed: original_text,
+    let newString = ` ${original_text} can be treated by `;
+    // Here is the data for the LSTM generator
+    let data = {
         seed: newString,
-          temperature: 0.60,
+        temperature: 0.60,
         length:120
       };
     
       // Generate text with the charRNN
-      charRNN.generate(data, gotData);
+    charRNN.generate(data, gotData);
+    //create an offscreen image with the txt for the pix2pix model
     createTempCanvas();
         
     }else {
-      // Clear everything
-      prediction_text = "";
-      original_text = "";
-         story ='';
+        // Clear everything
+        prediction_text = "";
+        original_text = "";
+        story ='';
     }
   }
 }
 
 // Update the DOM elements with typed and generated text
 function gotData(err, result) {
- console.log('no results here');
-  prediction_text = result.sample;
+    console.log('no results here');
+    prediction_text = result.sample;
     story = ` ${myString} can be treated by ${prediction_text}`
   
-
- //createTempCanvas()
-isGenerating = false;
-    
+   isGenerating = false;    
 }
 
 
 
 function createTempCanvas(){
     
-        //generate the pix2pix image
-  with(tempGraphics){
-    background(255);
-      fill(0);
-      //rect(width/2, height/2, 30,30);
-      
-      
-    //  fill(255, 232, 25);  
-  textSize(60);
-  textAlign(CENTER, CENTER);
-  text(myString, width/2,height/2);
-      
-      
-      
-  }
+        //generate the offscreen image to send to pix2pix
+    with(tempGraphics){
+        background(255);
+        fill(0);
+        textSize(60);
+        textAlign(CENTER, CENTER);
+        text(myString, width/2,height/2); 
+    }
+    
     runPix2Pix();
 }
 
-///pix2pix area
+
+
+//pix2pix area
 
 function pixModelLoaded() {
     console.log('model loaded');
@@ -365,36 +350,24 @@ function pixModelLoaded() {
 
 function runPix2Pix() {
     // Update status message
-    isProcessing = true;
     console.log("applying pix2pix");
-
-    // pix2pix requires a canvas DOM element, we can get p5.js canvas and pass this
-    // Select canvas DOM element, this is the p5.js canvas
-  //  const canvasElement = select("tempGraphics").elt;
-
-    // Apply pix2pix transformation
-    //pix2pix.transfer(canvasElement).then((result) => {
-    
-   // const canvasElement = select("tempGraphics").elt;
-    
+    //isProcessing = true;
     pix2pix.transfer(tempGraphics.elt).then((result) => {
         
     isProcessing = false;
-        let rec_img = createImg(result.src, "a generated image using pix2pix").hide(); // hide the DOM element
+    let rec_img = createImg(result.src, "a generated image using pix2pix").hide(); // //hide the DOM element
         
-        with(tempGraphics){
+    with(tempGraphics){
         image(rec_img, 0, 0); // draw the image on the canvas
-        }
+    }
         
-        saveCanvas(tempGraphics, "prescription", "png");
+    saveCanvas(tempGraphics, "keepThisScan", "png");
         
-        rec_img.remove(); // this removes the DOM element, as we don't need it anymore
+    rec_img.remove(); // this removes the DOM element, as we don't need it anymore
     });
 }
 
 
-
-//where i am at the moment is that I need to get make the pix to pix section work
 
 
                                 
