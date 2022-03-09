@@ -332,7 +332,7 @@ function createTempCanvas(){
         fill(0);
         textSize(60);
         textAlign(CENTER, CENTER);
-        text(myString, width/2,height/2); 
+        text(myString, width/4,height/4); 
     }
     
     runPix2Pix();
